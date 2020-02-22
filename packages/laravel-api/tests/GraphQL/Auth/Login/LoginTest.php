@@ -17,19 +17,22 @@ class SuccessfulLoginTest extends GraphQLTestCase
     {
         parent::setUp();
 
+        /**
+         * Create a user and persist it to the database.
+         */
         $this->user = factory(User::class)->create([
             'name'     => 'Foo Bar',
             'email'    => 'foe.bar@testing.com',
-            'password' => bcrypt('password'),
+            'password' => bcrypt($password = 'password'),
         ]);
 
         $this->response = $this->graphQL(
             /** @lang GraphQL */
             '
-            mutation {
+            mutation Login($username: String!, $password: String!) {
                 login(input: {
                     username: $username,
-                    password: "password"
+                    password: $password
                 }) {
                     access_token
                     refresh_token,
@@ -43,13 +46,10 @@ class SuccessfulLoginTest extends GraphQLTestCase
             }
             ',
             [
-                'username' => $this->user->email
+                'username' => $this->user->email,
+                'password' => $password,
             ]
         );
-
-        // Test cases
-        $this->should_return_HTTP_status_code_200();
-        $this->should_return_the_correct_user_and_tokens();
     }
 
     /** @test */
@@ -66,6 +66,7 @@ class SuccessfulLoginTest extends GraphQLTestCase
                 'login' => [
                     "token_type" => "Bearer",
                     'user' => [
+                        'id' => $this->user->id,
                         'name' => $this->user->name,
                         'email' => $this->user->email
                     ]
