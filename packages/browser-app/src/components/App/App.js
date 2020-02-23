@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import { Test } from '../Test'
 
 const client = new ApolloClient({
-  uri: 'http://192.168.10.10/graphql'
+  uri: process.env.API_URL
 })
 
 const App = () => {
